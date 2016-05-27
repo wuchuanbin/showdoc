@@ -62,9 +62,9 @@ function site_url()
 
 
 //导出称word
-function output_word($data,$fileName=''){
+function output_word($html,$fileName=''){
 
-    if(empty($data)) return '';
+    if(empty($html)) return '';
 
     $data = '
         <html xmlns:v="urn:schemas-microsoft-com:vml"
@@ -77,21 +77,36 @@ function output_word($data,$fileName=''){
         <meta name=Generator content="Microsoft Word 11">
         <meta name=Originator content="Microsoft Word 11">
         <xml><w:WordDocument><w:View>Print</w:View></xml></head>
-        <body>'.$data.'</body></html>';
+        <body>'.$html.'</body></html>';
     
     $filepath = tmpfile();
     $len = strlen($data);
-    fwrite($filepath, $data);
-    header("Content-type: application/octet-stream");
-    header("Content-Disposition: attachment; filename={$fileName}.doc");
-    header('Content-Description: File Transfer');
-    header('Content-Type: application/octet-stream');
-    header('Content-Disposition: attachment; filename='.$fileName.'.doc');
-    header('Content-Transfer-Encoding: binary');
-    header('Expires: 0');
-    header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-    header('Pragma: public');
-    header('Content-Length: ' . $len);
-    rewind($filepath);
-    echo fread($filepath,$len);
+    // echo $len;die;
+    //生成到文档保存区 跳转http下载
+    file_put_contents('/home/wwwroot/apidoc/export/'.$fileName.'.doc', $data);
+    $filename=realpath('/home/wwwroot/apidoc/export/'.$fileName.'.doc'); //文件名
+    // echo '/home/wwwroot/apidoc/export/'.$fileName.'.doc';
+
+
+    // echo $filename;die;
+     $date=date("Ymd-H:i:m");
+     Header( "Content-type:  application/octet-stream "); 
+     Header( "Accept-Ranges:  bytes "); 
+    Header( "Accept-Length: " .filesize($filename));
+     header( "Content-Disposition:  attachment;  filename= {$fileName}.doc"); 
+     echo file_get_contents($filename);
+     readfile($filename);
+    // fwrite($filepath, $data);
+    // header("Content-type: application/octet-stream");
+    // header("Content-Disposition: attachment; filename={$fileName}.doc");
+    // header('Content-Description: File Transfer');
+    // header('Content-Type: application/octet-stream');
+    // header('Content-Disposition: attachment; filename='.$fileName.'.doc');
+    // header('Content-Transfer-Encoding: binary');
+    // header('Expires: 0');
+    // header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+    // header('Pragma: public');
+    // header('Content-Length: ' . $len);
+    // rewind($filepath);
+    // echo fread($filepath,$len);
 }
